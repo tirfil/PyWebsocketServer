@@ -20,12 +20,14 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
     
     """
     def application(self,instance,buffer):
-        instance.sendData("hello World",0x1)
+        #instance.sendData("hello World",0x1)
+        instance.sendClose("toto")
+        print "state %d (2)" % instance.state()
         if instance.status() == 3:
-            print "Data frame to network"
+            print "Data frame to network (2)"
             response = instance.result()
             self.request.sendall(response)
-            print "send: \n%s" % response
+            print "send: \n%s (2)" % response
 
     def handle(self):
         # self.request is the TCP socket connected to the client
@@ -37,6 +39,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             #state = instance.state()
             instance.dataRecv(data)
             status = instance.status()
+            print "state %d" % instance.state()
             # send to client
             if status in [1,2,3,4,5]:
                 if status == 1:
@@ -60,6 +63,9 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                 response = instance.result()
                 print response
                 self.application(instance,response)
+            else:
+                #0
+                print "status is 0"
             data = self.request.recv(1024)
         print "disconnected"
         self.request.close()

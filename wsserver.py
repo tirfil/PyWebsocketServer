@@ -64,7 +64,7 @@ class wsserver:
     def dataRecv(self,buffer):
         if self.readyState == 0:
             self.processHandshake(buffer)
-        elif self.readyState == 1:
+        elif self.readyState > 0:
             self.processData(buffer)
             
     def result(self):
@@ -166,7 +166,27 @@ class wsserver:
         result += buffer
         self._result=result
         self._status=3
-          
+        
+    def sendPing(self,buffer):
+        size = len(buffer)
+        if size < 126:
+            self.sendData(buffer,0x9)
+        else:
+            print "Ping data too big"
+            self._status=0
+            
+    def sendClose(self,buffer):
+        size = len(buffer)
+        if size < 126:
+            if self.readyState == 1:
+                self.sendData(buffer,0x8)
+                self.readyState = 2
+            else:
+                print "Close wrong state"
+        else:
+            print "Close data too big"
+            self._status=0
+            
     def checkHsHeader(self,key,value,code):
         if not self.error:
             if value == "":

@@ -14,8 +14,15 @@ Based on RFC6455
 - result() : result after processing
 - dataSend() : data to be encoded before sent to network
 - state() : state of connection (readyState see websocket API)
-TODO:
------
+- sendPing() : Application send PING
+- sendClose() : Application send CLOSE
 
-- sendPing()
-- sendClose()
+status:
+
+-   0   Nothing to do
+-   1   HandShake OK to network
+-   2   HandShake NOK to network
+-   3   Data (frame encoded) to network
+-   4   Pong (After receiving a Ping) to network
+-   5   Close (After receiving close) to network
+-   8   Data (frame decoded) to application
