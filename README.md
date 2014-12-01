@@ -16,5 +16,6 @@ Based on RFC6455
 - state() : state of connection (readyState see websocket API)
 TODO:
 -----
+
 - sendPing()
 - sendClose()
