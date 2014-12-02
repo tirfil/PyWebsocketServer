@@ -1,4 +1,5 @@
 #! /usr/bin/python
+# -*- coding: utf-8 -*-
 
 import re
 import string
@@ -114,7 +115,7 @@ class wsserver:
         for index in range(offset,last):
             (byte,) = struct.unpack("B",buffer[index])
             if maskb:
-                result += str(unichr(int(byte ^ masks[imask])))
+                result += str(unichr(int(byte ^ masks[imask])).encode('utf-8'))
                 imask = (imask + 1) % 4
             else:
                 result += str(byte)
