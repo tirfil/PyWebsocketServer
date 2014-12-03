@@ -23,7 +23,6 @@ import kvheaders
 # result() : processing result
 # dataSend() : data to be encoded before sent to network
 # state() : state of connection (readyState see websocket API)
-# TODO
 # sendPing()
 # sendClose()
 
@@ -55,6 +54,7 @@ class wsserver:
         self._result = ""
         self.error = False
         self._status=0
+        self.extra=""
         
     def state(self):
         return self.readyState
@@ -73,12 +73,22 @@ class wsserver:
         self._result = ""
         self._status=0
         return result
+        
+    def isIncomplete(self):
+        if len(self.extra) > 0:
+            return True
+        else:
+            return False
             
     def processData(self,buffer):
         print "processData"
+
+        if len(self.extra)>0:
+            buffer = self.extra+buffer
+            self.extra=""
+        blen = len(buffer)
+            
         frame = struct.unpack("BB",buffer[:2])
-        #print "0x%02x" % frame[0]
-        #print "0x%02x" % frame[1]
         if frame[0] > 0x7f:
             final = True
         else:
@@ -110,8 +120,16 @@ class wsserver:
             print "Mask3 0x%02x" % masks[3]
             offset = offset+4
             imask = 0
-        result = ""
         last = offset+length
+        
+        print "frame size: %s, packet size: %s" % (last,blen) 
+        if last > blen:
+            # packet too small
+            self.extra=buffer
+            self._status=0
+            return
+
+        result = ""
         for index in range(offset,last):
             (byte,) = struct.unpack("B",buffer[index])
             if maskb:
@@ -141,6 +159,10 @@ class wsserver:
             #if opcode == 0x1:
             self._result = result
             self._status=8
+
+        if last < blen:
+            # packet too big
+            self.extra=buffer[last+1:]
                 
     def sendData(self,buffer,opcode=0x01,final=True,mask=False):
         size = len(buffer)
